@@ -13,6 +13,10 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     //declare rules for authentication
+
+    // priviledges for admin is set to 1
+    private $priviledges = 1;
+
     public function rules()
     {
         return [
@@ -59,7 +63,8 @@ class UserController extends Controller
                 'email' => $request->email,
                 'password' => bcrypt($request->password),
                 'age' => $request->age,
-                'phone' => $request->phone
+                'phone' => $request->phone,
+                'priviledges' => $this->priviledges
             ]);
 
             $token = $user->createToken('myapp')->accessToken;

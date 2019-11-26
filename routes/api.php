@@ -32,3 +32,5 @@ Route::post('/login','UserController@login');
 Route::post('/customer','CustomerController@store');
 // show a customer profile
 Route::get('/customer','CustomerController@store');
+// create a vendor
+Route::post('/vendor','VendorController@store');

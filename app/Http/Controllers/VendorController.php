@@ -21,8 +21,8 @@ class VendorController extends Controller
          return [
              'name' => 'required|max:45',
              'email' => 'required|email|unique:users',
-             'password' => 'required|min:6',
-             'age' => 'required|integer',
+             'password' => 'required|min:6|confirmed',
+            //  'age' => 'required|integer',
              'phone' => 'required|max:11',
          ];
      }
@@ -66,9 +66,9 @@ class VendorController extends Controller
                 'priviledges' => $this->priviledges
             ]);
 
-            $token = $user->createToken('myapp')->accessToken;
-
-            return response()->json(['token' => $token,'user' => $user], 200);
+            return response()->json([
+                'message' => 'Account created successfully'
+            ], 200);
         }
     }
 
@@ -106,6 +106,16 @@ class VendorController extends Controller
         //
     }
 
+    // search for anything related to a drug
+
+    public function search($query)
+    {
+        $query = strtolower($query);
+        $drug = User::find(auth()->id())->drugs()->where('name','LIKE','%'.$query.'%')
+        ->orWhere('company','LIKE','%'.$query.'%')->orWhere('effects','LIKE','%'.$query.'%')
+        ->orWhere('interaction','LIKE','%'.$query.'%')->orWhere('cure','LIKE','%'.$query.'%')->get();
+        return response()->json(['drug' => $drug], 200);
+    }
     /**
      * Remove the specified resource from storage.
      *

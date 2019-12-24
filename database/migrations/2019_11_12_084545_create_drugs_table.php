@@ -17,8 +17,9 @@ class CreateDrugsTable extends Migration
             $table->bigIncrements('id');
             $table->string('name');
             $table->string('company');
-            $table->text('effects');
-            $table->text('interaction');
+            $table->integer('price');
+            $table->text('effects')->nullable();
+            $table->text('interaction')->nullable();
             $table->text('cure');
             $table->unsignedBigInteger('vendor_id');
             $table->timestamps();

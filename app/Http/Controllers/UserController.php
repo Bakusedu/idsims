@@ -33,14 +33,13 @@ class UserController extends Controller
         //
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    //return users drugs 
+
+    public function user_drugs()
     {
-        //
+        $drugs = auth()->user()->drugs();
+
+        return response()->json(['drugs' => $drugs], 200);
     }
 
     /**
@@ -67,9 +66,7 @@ class UserController extends Controller
                 'priviledges' => $this->priviledges
             ]);
 
-            $token = $user->createToken('myapp')->accessToken;
-
-            return response()->json(['token' => $token,'user' => $user], 200);
+            return response()->json(['user' => $user], 200);
         }
     }
 
@@ -83,7 +80,7 @@ class UserController extends Controller
     {
         //show the Auth users profile
         // attached to the response headers must append the users token
-        return response()->json(['user' => auth()->user()], 200);
+        return response()->json(['user' => auth()->user()->id], 200);
     }
 
     /**
@@ -131,7 +128,13 @@ class UserController extends Controller
             $token = auth()->user()->createToken('myapp')->accessToken;
             return response()->json(['token' => $token,'user' => auth()->user()], 200);
         } else {
-            return response()->json(['error' => 'Unauthorised'], 401);
+            return response()->json(['error' => 'Authentication failed'], 401);
         }
+    }
+
+    // see all the drugs sold by vendors monthly
+    public function monthlyPurchase()
+    {
+        
     }
 }

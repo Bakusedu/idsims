@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateCustomersTable extends Migration
+class ChangeAgeColumnType extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,8 @@ class CreateCustomersTable extends Migration
      */
     public function up()
     {
-        Schema::create('customers', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->string('customer_id')->unique();
-            $table->json('allergies')->nulllable();
-            $table->timestamps();
+        Schema::table('users', function ($table) {
+            $table->string('age')->change();
         });
     }
 
@@ -28,6 +25,6 @@ class CreateCustomersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('customers');
+        //
     }
 }

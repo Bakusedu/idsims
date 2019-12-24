@@ -6,6 +6,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
+use App\Drug;
 
 class User extends Authenticatable
 {
@@ -37,4 +38,22 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    protected $table = 'users';
+    // relationships
+
+    public function drugs()
+    {
+        return $this->hasMany('App\Drug','vendor_id');
+    }
+
+    public function customerPurchase()
+    {
+        return $this->hasMany('App\Purchase','purchasedBy');
+    }
+
+    public function vendorMonthlySoldDrugs()
+    {
+        return $this->hasMany('App\Purchase','purchasedFrom');
+    }
 }

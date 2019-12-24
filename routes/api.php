@@ -19,7 +19,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 // create a user
 Route::post('user','UserController@store');
 // view a user profile
-Route::get('user/{user_id}','UserController@show')->middleware('auth:api');
+Route::get('user','UserController@show')->middleware('auth:api');
 // update a user
 Route::put('user','UserController@update')->middleware('auth:api');
 // delete a user
@@ -34,3 +34,11 @@ Route::post('/customer','CustomerController@store');
 Route::get('/customer','CustomerController@store');
 // create a vendor
 Route::post('/vendor','VendorController@store');
+// create a drug
+Route::post('/drug','DrugController@store')->middleware('auth:api');
+// update a drug
+Route::patch('/drug/{drug_id}','DrugController@update')->middleware('auth:api');
+// delete a drug
+Route::delete('/drug/{drug_id}','DrugController@destroy')->middleware('auth:api');
+// Search for anything related to a drug table
+Route::get('/drug/search/{query}','VendorController@search')->middleware('auth:api');

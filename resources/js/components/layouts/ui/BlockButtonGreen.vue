@@ -1,13 +1,13 @@
 <template>
   <div>
-      <button class="btn-blue">
+      <button class="btn-green">
           <slot></slot>
       </button>
   </div>
 </template>
-<style>
-    .btn-blue {
-        background-color:#2770c2;
+<style scoped>
+    .btn-green {
+        background-color:#08b577;
         width:100%;
         border: none;
         padding: 5px;

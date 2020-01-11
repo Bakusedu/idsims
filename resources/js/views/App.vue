@@ -9,6 +9,15 @@
         padding: 0px;
         color:white;
     }
+    ::-webkit-scrollbar {
+    width: 9px;
+    height: 10px;
+
+  }
+  ::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background: #cdcfd1;
+  }
 </style>
 <script>
 export default {

@@ -21,7 +21,7 @@ Route::post('user','UserController@store');
 // view a user profile
 Route::get('user','UserController@show')->middleware('auth:api');
 // update a user
-Route::put('user','UserController@update')->middleware('auth:api');
+Route::put('user/{user_id}','UserController@update')->middleware('auth:api');
 // delete a user
 Route::delete('user/{user_id}','UserController@destroy')->middleware('auth:api');
 // get all users
@@ -38,7 +38,11 @@ Route::post('/vendor','VendorController@store');
 Route::post('/drug','DrugController@store')->middleware('auth:api');
 // update a drug
 Route::patch('/drug/{drug_id}','DrugController@update')->middleware('auth:api');
+// get all drugs
+Route::get('/drug','DrugController@index')->middleware('auth:api');
+// show single drug
+Route::get('/drug/{id}','DrugController@show')->middleware('auth:api');
 // delete a drug
 Route::delete('/drug/{drug_id}','DrugController@destroy')->middleware('auth:api');
 // Search for anything related to a drug table
-Route::get('/drug/search/{query}','VendorController@search')->middleware('auth:api');
+Route::get('/search','VendorController@search')->middleware('auth:api');

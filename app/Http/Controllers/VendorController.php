@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\User;
+use App\Drug;
 use Validator;
 
 class VendorController extends Controller
@@ -108,13 +109,18 @@ class VendorController extends Controller
 
     // search for anything related to a drug
 
-    public function search($query)
+    public function search()
     {
-        $query = strtolower($query);
-        $drug = User::find(auth()->id())->drugs()->where('name','LIKE','%'.$query.'%')
-        ->orWhere('company','LIKE','%'.$query.'%')->orWhere('effects','LIKE','%'.$query.'%')
-        ->orWhere('interaction','LIKE','%'.$query.'%')->orWhere('cure','LIKE','%'.$query.'%')->get();
-        return response()->json(['drug' => $drug], 200);
+        if($query = \Request::get('q')){
+            $query = strtolower($query);
+            $drug = User::find(auth()->id())->drugs()->where('name','LIKE','%'.$query.'%')
+            ->orWhere('company','LIKE','%'.$query.'%')->orWhere('effects','LIKE','%'.$query.'%')
+            ->orWhere('interaction','LIKE','%'.$query.'%')->orWhere('cure','LIKE','%'.$query.'%')->get();
+        }
+        else {
+            $drug = Drug::where('vendor_id',auth()->id())->get();
+        }
+        return $drug;
     }
     /**
      * Remove the specified resource from storage.

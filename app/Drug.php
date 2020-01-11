@@ -9,7 +9,7 @@ class Drug extends Model
 {
     protected $fillable = [
         'name','company','price','effects','interaction','cure','vendor_id','qty','overdose','hcpi',
-        'active_ingredients','dosage','drug_type','note'
+        'active_ingredients','dosage','drug_type','note','photo'
     ];
 
     protected $table = 'drugs';

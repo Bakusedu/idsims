@@ -22,7 +22,7 @@ class CustomerController extends Controller
             'name' => 'required|max:45',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:6',
-            'age' => 'required|integer',
+            // 'age' => 'required|integer',
             'phone' => 'required|max:11',
         ];
     }

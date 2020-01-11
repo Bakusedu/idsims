@@ -1,21 +1,19 @@
 <template>
-    <div id="bgColor">
+    <div>
         <transition name="fade">
             <div v-if="signup" class="wrapper">
-                    <div class="form">
+                    <div style="box-shadow: 0 0 5px 1px #d2cccc" class="form">
                         <form @submit.prevent="register">
                             <div class="form-header">
                                 <h4 id="form-header">Sign up</h4>
                                 <p  @click="signupClose" id="form-p">&times;</p>
                             </div>
                             <div v-if="this.errorArray.length > 0">
-                                <div class="error">
-                                    <p v-for="error in this.errorArray" :key="error.index">{{ error }}</p>
-                                </div>
+                                <ErrorComponent v-bind:errors = "this.errorArray"/>
                             </div>
                             <div v-if="this.output">
                                 <div class="success">
-                                    <p>{{ this.output }}</p>
+                                    <SuccessComponent v-bind:message = "this.output" />
                                 </div>
                             </div>
                             <div class="form-group">
@@ -62,16 +60,14 @@
         </transition>
         <transition name="fade">
             <div v-if="login" class="wrapper">
-                    <div class="form">
+                    <div style="box-shadow: 0 0 5px 1px #d2cccc" class="form">
                         <form @submit.prevent="loginQuery">
                             <div class="form-header">
                                 <h4 id="form-header">Login</h4>
                                 <p  @click="loginClose" id="form-p">&times;</p>
                             </div>
-                            <div v-if="this.output">
-                                <div class="error">
-                                    <p>{{ this.output }}</p>
-                                </div>
+                            <div v-if="this.errorArray.length > 0">
+                                <ErrorComponent v-bind:errors = "this.errorArray"/>
                             </div>
                             <div class="form-group">
                                 <label for="email">Email</label>
@@ -81,7 +77,6 @@
                                 <label for="password">Password</label>
                                 <input type="password" v-model="dataLogin.password" class="form-control">
                             </div>
-                            <hr>
                             <div>
                                 <button @click="loginQuery" class="btn-blue">
                                     <div v-if="isLoading_login" class="spinner-border" style="height:1.3rem;width:1.3rem" role="status">
@@ -99,8 +94,8 @@
                     </div>
             </div>
         </transition>
-        <div id="container" :class="[form ? 'blur' : '']">
-            <AppHeader v-on:form="displayForm($event)"></AppHeader>
+            <AppHeader v-bind:name="this.auth_user_name" v-on:form="displayForm($event)"></AppHeader>
+            <div :class="[form ? 'blur' : '']">
             <main>
                 <section style="width:39%;margin-right:2%">
                     <div>
@@ -177,22 +172,6 @@
     form {
         padding:20px;
     }
-    .success {
-        background-color: #08b577;
-        padding: 5px;
-        border-radius: 2px;
-    }
-    .success p {
-        margin: 0px;
-    }
-    .error {
-        background-color: #d9534f;
-        padding: 5px;
-        border-radius: 5px;
-    }
-    .error p {
-        margin:0px
-    }
     .form-group {
         margin-bottom:0px;
         padding:5px;
@@ -200,9 +179,6 @@
     .form-group label {
         color:black;
         margin:0px;
-    }
-    .form-group input {
-        height: 28px;
     }
     form .form-header{
         display:flex;
@@ -239,6 +215,11 @@
     }
 </style>
 <script>
+var config = {
+    headers: {
+        'Authorization': "Bearer "+localStorage.getItem('token'),
+    }
+};
 import axios from 'axios';
     export default {
         data(){
@@ -265,6 +246,7 @@ import axios from 'axios';
                 login: false,
                 isLoading_login: false,
                 isLoading_signup: false,
+                auth_user_name: ''
             }
         },
         methods : {
@@ -290,12 +272,13 @@ import axios from 'axios';
                 this.data.age = '';
                 this.form = false;
                 this.output = '';
+                this.isLoading_signup = false;
             },
             loginClose(){
                 this.login = false;
                 this.form = false;
                 this.isLoading_login = false;
-                this.output = '';
+                this.errorArray = [];
             },
             register() {
                 // signup new user
@@ -324,6 +307,9 @@ import axios from 'axios';
                         if(element.phone){
                             this.errorArray.push(element.phone[0]);
                         }
+                        if(element.age){
+                            this.errorArray.push(element.age[0]);
+                        }
                     });
                     this.isLoading_signup = false;
                     this.url = false;
@@ -332,17 +318,33 @@ import axios from 'axios';
             loginQuery(){
                 // log the user in
                 this.output = '';
+                this.errorArray = [];
                 this.url = 'http://127.0.0.1:8000/api/login';
                 this.isLoading_login = true;
                 axios.post(this.url,this.dataLogin)
                 .then(res => {
-                    // this.output = res.data.message;
-                    this.isLoading_signup = false;
+                    localStorage.setItem('token',res.data.token);
+                    this.isLoading_login = false;
+                    this.$router.push('/dashboard');
+                    // location.reload();
+                    this.$noty.info('Logged in successfully');
                 }).catch(err => {
-                    this.output = err.response.data.error; 
+                    this.errorArray.push(err.response.data.error); 
                     this.isLoading_login = false;
                 })
+            },
+            fetchAuthUser(){
+                if(localStorage.getItem('token')){
+                    fetch('http://127.0.0.1:8000/api/user',config)
+                     .then(res => res.json())
+                     .then(res => {
+                         this.auth_user_name = res.name;
+                     }) 
+                }
             }
+        },
+        created(){
+            this.fetchAuthUser();
         }
     }
 </script>

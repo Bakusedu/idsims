@@ -27,6 +27,15 @@ class UserController extends Controller
             'phone' => 'required|max:11',
         ];
     }
+    public function update_rules()
+    {
+        return [
+            'name' => 'required|max:45',
+            'email' => 'required|email',
+            'address' => 'required|min:10',
+            'phone' => 'required|max:11',
+        ];
+    }
 
     public function index()
     {
@@ -80,7 +89,7 @@ class UserController extends Controller
     {
         //show the Auth users profile
         // attached to the response headers must append the users token
-        return response()->json(['user' => auth()->user()->id], 200);
+        return auth()->user();
     }
 
     /**
@@ -103,7 +112,22 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        //validate user requests
+        $rules = $this->update_rules();
+        $validator = Validator::make($request->all(),$rules);
+        if($validator->fails()){
+            return response()->json(['error' => $validator->errors()],400);
+        }
+        else{
+            $user = User::findOrFail($id);
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->phone = $request->phone;
+            $user->address = $request->address;
+            $user->save();
+        }
+
+        return $user;
     }
 
     /**
@@ -126,7 +150,7 @@ class UserController extends Controller
  
         if (auth()->attempt($credentials)) {
             $token = auth()->user()->createToken('myapp')->accessToken;
-            return response()->json(['token' => $token,'user' => auth()->user()], 200);
+            return response()->json(['token' => $token], 200);
         } else {
             return response()->json(['error' => 'Authentication failed'], 401);
         }

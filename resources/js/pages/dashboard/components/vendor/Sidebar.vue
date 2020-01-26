@@ -16,22 +16,6 @@
               </span>
           </li>
       </ul>
-      <ul>
-          <li :id="(choosen === 'Customers')? 'selected' : 'unselected'" @click="choice('customers')">
-              <span style="margin-left: 10px;">
-                  <i :id="(choosen === 'Customers')? 'select' : 'unselect'" class="fa fa-users"></i>
-                  <span :id="(choosen === 'Customers')? 'select' : 'unselect'">Customers</span>
-              </span>
-          </li>
-      </ul>
-      <ul>
-          <li :id="(choosen === 'Sell medecine')? 'selected' : 'unselected'" @click="choice('sell medecine')">
-              <span style="margin-left: 10px;">
-                  <i :id="(choosen === 'Sell medecine')? 'select' : 'unselect'" class="fa fa-cart-plus"></i>
-                  <span :id="(choosen === 'Sell medecine')? 'select' : 'unselect'">Sell medecine</span>
-              </span>
-          </li>
-      </ul>
   </div>
 </template>
 
@@ -52,14 +36,6 @@ export default {
             if(value === 'settings'){
                 this.choosen = 'Settings';
                 this.emitEvent();
-            }
-            if(value === 'customers'){
-                this.choosen = 'Customers';
-                this.emitEvent();
-            }
-            if(value === 'sell medecine'){
-                this.choosen = 'Sell medecine';
-                this.$emit('choice',this.choosen);
             }
         },
         emitEvent(){

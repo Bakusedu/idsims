@@ -9,6 +9,11 @@
     .btn-blue {
         text-decoration:none;
         color:white;
+        font-weight:bold;
+    }
+    .btn-blue:hover {
+        text-decoration:none;
+        color:white;
     }
 </style>
 <script>

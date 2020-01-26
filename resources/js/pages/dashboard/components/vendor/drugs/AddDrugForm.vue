@@ -2,11 +2,6 @@
   <div>
       <div>
         <h6 style="color:black"><i style="color:black" class="fa fa-plus pr-1"></i>Add a new drug</h6>
-        <div class="mb-1" v-if="this.output">
-            <div class="success">
-                <SuccessComponent v-bind:message = "this.output" />
-            </div>
-        </div>
         <div v-if="this.errorArray.length > 0">
             <ErrorComponent v-bind:errors = "this.errorArray"/>
         </div>
@@ -77,6 +72,14 @@
                 <label class="checkbox-inline pr-2"><input type="checkbox" @change="disableUnCheckedHcpi('moderate')" :disabled = disableModerate name="moderate" v-model="hcpi.moderate" value="2">Moderate</label>
                 <label class="checkbox-inline"><input type="checkbox" @change="disableUnCheckedHcpi('high')" :disabled = disableHigh name="high" v-model="hcpi.high" value="5">High</label>
             </div>
+            <div class="form-group">
+                <label for="">Nafdac registration number</label>
+                <input type="text" v-model="drug.nafdac" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="">Expiry date</label>
+                <input type="text" v-model="drug.expiry_date" class="form-control">
+            </div>
             <BlockButtonBlue>Add drug</BlockButtonBlue>
             </div>
         </form>
@@ -86,11 +89,6 @@
 
 <script>
 import axios from 'axios';
-var config = {
-    headers: {
-        'Authorization': "Bearer "+localStorage.getItem('token'),
-    }
-};
 var bodyParameters = {
     key: "value"
 }
@@ -111,7 +109,10 @@ export default {
                 qty: '',
                 drug_type: '',
                 hcpi: '',
-                image: ''
+                image: '',
+                nafdac:'',
+                expiry_date:'',
+                token:''
             },
             drug_type: {
                 satchet: '',
@@ -132,18 +133,23 @@ export default {
             url: 'http://127.0.0.1:8000/api/drug',
             errorArray:[],
             temp_errors:[],
-            output: ''
         }
     },
     methods: {
         addDrug(){
+            this.token = localStorage.getItem('token');
+            let config = {
+                headers:{
+                    'Authorization': "Bearer "+this.token
+                }
+            }
             this.assignHcpi();
             this.assignDrugType();
             this.temp_errors = [];
             this.errorArray = [];
             axios.post(this.url,this.drug,config)
             .then(res => {
-                this.output = res.data.message;
+                this.$noty.success(res.data.message);
                 this.$emit('new-drug',res.data.drug);
             }).catch(err => {
                 this.temp_errors.push(err.response.data.error);
@@ -235,7 +241,7 @@ export default {
             var fileReader = new FileReader();
             fileReader.readAsDataURL(e.target.files[0]);
             fileReader.onload = (e) => {
-                this.drug.image = e.target.result;
+                this.drug.photo = e.target.result;
             }
         }
     }

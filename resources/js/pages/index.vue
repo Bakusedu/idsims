@@ -168,6 +168,7 @@
         width: 30%;
         position: absolute;
         border-radius:5px;
+        border:1px solid lightgrey;
     }
     form {
         padding:20px;
@@ -225,6 +226,7 @@ import axios from 'axios';
         data(){
             return {
                 signup: false,
+                token:'',
                 data: {
                     age:'',
                     phone: '',
@@ -334,13 +336,17 @@ import axios from 'axios';
                 })
             },
             fetchAuthUser(){
-                if(localStorage.getItem('token')){
+                this.token = localStorage.getItem('token');
+                let config = {
+                    headers:{
+                        'Authorization': "Bearer "+this.token
+                    }
+                }
                     fetch('http://127.0.0.1:8000/api/user',config)
                      .then(res => res.json())
                      .then(res => {
                          this.auth_user_name = res.name;
-                     }) 
-                }
+                }) 
             }
         },
         created(){

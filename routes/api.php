@@ -31,7 +31,7 @@ Route::post('/login','UserController@login');
 // create a customer
 Route::post('/customer','CustomerController@store');
 // show a customer profile
-Route::get('/customer','CustomerController@store');
+Route::get('/customer/{customer_id}','CustomerController@show');
 // create a vendor
 Route::post('/vendor','VendorController@store');
 // create a drug
@@ -46,3 +46,25 @@ Route::get('/drug/{id}','DrugController@show')->middleware('auth:api');
 Route::delete('/drug/{drug_id}','DrugController@destroy')->middleware('auth:api');
 // Search for anything related to a drug table
 Route::get('/search','VendorController@search')->middleware('auth:api');
+// get Customer drug history
+Route::get('/customer/{phone}','UserController@customerDrugHistory')->middleware('auth:api');
+// add a new purchase
+Route::post('/purchase','UserController@purchase')->middleware('auth:api');
+// get vendor drug purchase
+Route::get('/drug_purchase/{id}','UserController@getDrugPurchase')->middleware('auth:api');
+// get health information data through purchases made by customer
+Route::get('/health_information','CustomerController@healthInformation')->middleware('auth:api');
+// post vendor settings
+Route::post('/vendor_settings','VendorController@upload')->middleware('auth:api');
+// get vendor settings
+Route::get('/vendor_settings','VendorController@getSettings')->middleware('auth:api');
+// get all vendors registered in the db
+Route::get('/vendors','UserController@vendors')->middleware('auth:api');
+// get all customers registered in the db
+Route::get('/customers','UserController@customers')->middleware('auth:api');
+// get vendors sold drugs
+Route::get('/vendor_purchases/{vendor_id}','UserController@allVendorPurchase')->middleware('auth:api');
+// get vendors sold drugs
+Route::get('/vendor_purchase_frequency/{vendor_id}','UserController@vendorFrequency')->middleware('auth:api');
+// toggle Vendor activation status
+Route::get('/toggle_status/{vendor_id}','UserController@toggleActivation')->middleware('auth:api');

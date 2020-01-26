@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
 use App\Drug;
+use App\Purchase;
 
 class User extends Authenticatable
 {
@@ -52,8 +53,13 @@ class User extends Authenticatable
         return $this->hasMany('App\Purchase','purchasedBy');
     }
 
-    public function vendorMonthlySoldDrugs()
+    public function vendorSoldDrugs()
     {
-        return $this->hasMany('App\Purchase','purchasedFrom');
+        return $this->hasMany('App\Purchase','purchasedFrom','id');
+    }
+
+    public function vendors()
+    {
+        return $this->hasOne('App\Vendor','store_id','id');
     }
 }

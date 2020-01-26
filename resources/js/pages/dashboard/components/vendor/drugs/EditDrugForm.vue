@@ -1,14 +1,10 @@
 <template>
    <div>
-       <div class="mb-1" v-if="this.output">
-            <div class="success">
-                <SuccessComponent v-bind:message = "this.output" />
-            </div>
-        </div>
         <div v-if="this.errorArray.length > 0">
             <ErrorComponent v-bind:errors = "this.errorArray"/>
         </div>
-        <form @submit.prevent="updateDrug" enctype="multipart/form-data" style="overflow-y:scroll;height:50vh">
+        <form @submit.prevent="updateDrug" method="POST" enctype="multipart/form-data" style="overflow-y:scroll;height:50vh">
+            @csrf
             <div class="form-group">
                 <label for="">Drug name</label>
                 <input type="text" name="name" v-model="drug.name" class="form-control">
@@ -26,7 +22,7 @@
             </div>
             <div class="form-group">
                 <label for="">Drug photo</label>
-                <input type="file" style="border:none" class="form-control" @change="OnChangeFile($event)">
+                <input type="file" style="border:none" name="image" class="form-control" @change="OnChangeFile($event)">
             </div>
             <div class="border-red">
                 <div class="form-group">
@@ -75,6 +71,14 @@
                 <label class="checkbox-inline pr-2"><input type="checkbox" @change="disableUnCheckedHcpi('moderate')" :disabled = disableModerate name="moderate" v-model="hcpi.moderate" value="2">Moderate</label>
                 <label class="checkbox-inline"><input type="checkbox" @change="disableUnCheckedHcpi('high')" :disabled = disableHigh name="high" v-model="hcpi.high" value="5">High</label>
             </div>
+            <div class="form-group">
+                <label for="">Nafdac registration number</label>
+                <input type="text" v-model="drug.nafdac" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="">Expiry date</label>
+                <input type="text" v-model="drug.expiry_date" class="form-control">
+            </div>
             <BlockButtonGreen>Update drug</BlockButtonGreen>
             </div>
         </form>
@@ -82,15 +86,7 @@
 </template>
 
 <script>
-    import axios from 'axios';
-var config = {
-    headers: {
-        'Authorization': "Bearer "+localStorage.getItem('token'),
-    }
-};
-var bodyParameters = {
-    key: "value"
-}
+import axios from 'axios';
 export default {
     props:['drugDetails'],
     data(){
@@ -108,8 +104,10 @@ export default {
                 note: '',
                 qty: '',
                 drug_type: '',
-                hcpi: '',
-                photo: ''
+                nafdac:'',
+                expiry_date:'',
+                hcpi: 0,
+                image: {}
             },
             temp_drug: {},
             drug_type: {
@@ -122,6 +120,7 @@ export default {
                 moderate:false,
                 high:false
             },
+            token:'',
             disableSatchet:false,
             disableCounting:false,
             disableSyrup:false,
@@ -131,7 +130,6 @@ export default {
             url: '',
             errorArray:[],
             temp_errors:[],
-            output: ''
         }
     },
     watch: {
@@ -147,6 +145,8 @@ export default {
             this.drug.dosage = newVal.dosage
             this.drug.note = newVal.note
             this.drug.qty = newVal.qty
+            this.drug.nafdac = newVal.nafdac
+            this.drug.expiry_date = newVal.expiry_date
             if(newVal.drug_type === 1){
                 this.disableUnCheckedDrugTypes('satchet')
                 this.drug_type.satchet = true
@@ -172,12 +172,19 @@ export default {
                 this.hcpi.high = true
             }
             
-            this.drug.photo = newVal.photo
+            this.drug.image = newVal.photo
             this.url = 'http://127.0.0.1:8000/api/drug/'+newVal.id
         }
     },
     methods: {
         updateDrug(){
+            this.token = localStorage.getItem('token');
+            let config = {
+                headers:{
+                    'Authorization': "Bearer "+this.token,
+                    // "content-type": "multipart/form-data"
+                }
+            }
             this.assignHcpi();
             this.assignDrugType();
             this.temp_errors = [];
@@ -185,7 +192,7 @@ export default {
             this.errorArray = [];
             axios.patch(this.url,this.drug,config)
             .then(res => {
-                this.output = res.data.message;
+                this.$noty.success(res.data.message);
                 this.drug = res.data.drug;
                 this.$emit('added',this.drug);
             }).catch(err => {

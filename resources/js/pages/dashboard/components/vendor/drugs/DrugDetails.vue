@@ -3,7 +3,7 @@
         <div class="d-flex" style="justify-content:space-between">
             <p style="color:black;width:40%">Photo</p>
             <p style="color:black;width:40%">
-                <img :src="'http://127.0.0.1:8000/'+drugDetails.photo" class="img-fluid" alt="">
+                <img :src="'http://127.0.0.1:8000/images/'+drugDetails.photo" class="img-fluid" alt="">
             </p>
         </div>
         <div class="d-flex" style="justify-content:space-between">
@@ -41,6 +41,10 @@
             <p style="color:black;width:40%">{{ drugDetails.interaction }}</p>
         </div>
         <div class="d-flex" style="justify-content:space-between">
+            <p style="color:black;width:40%">Overdose</p>
+            <p style="color:black;width:40%">{{ drugDetails.overdose }}</p>
+        </div>
+        <div class="d-flex" style="justify-content:space-between">
             <p style="color:black;width:40%">Dosage</p>
             <p style="color:black;width:40%">{{ drugDetails.dosage }}</p>
         </div>
@@ -53,6 +57,14 @@
             <p v-if="drugDetails.hcpi === 5" style="background-color:#e15361;text-align:center;width:40%;border-radius:20px">High</p>
             <p v-if="drugDetails.hcpi === 2" style="background-color:#ffc20d;text-align:center;width:40%;border-radius:20px">Moderate</p>
             <p v-if="drugDetails.hcpi === 0" style="background-color:#7d858c;text-align:center;width:40%;border-radius:20px">Low</p>
+        </div>
+        <div class="d-flex" style="justify-content:space-between">
+            <p style="color:black;width:40%">Nafdac reg no</p>
+            <p style="color:black;width:40%">{{ drugDetails.nafdac }}</p>
+        </div>
+        <div class="d-flex" style="justify-content:space-between">
+            <p style="color:black;width:40%">Expiry date</p>
+            <p style="color:black;width:40%">{{ drugDetails.expiry_date }}</p>
         </div>
     </div>
 </template>

@@ -4,8 +4,17 @@
             <div v-if="displayDrugView">
                 <DisplayDrugView v-bind:drugId="this.drugId" v-on:close="closeDisplayDrugView()" />
             </div>
+            <div v-if="displayVendorView">
+                <DisplayVendorView v-if="vendorName" v-bind:name="this.vendorName" v-bind:id="this.id" v-on:close_vendor="closeVendorView()" />
+            </div>
+            <div v-if="sell">
+                <SellDrugView v-on:close_sell="closeSellDrug()" v-bind:drugId="this.drugId" v-bind:drugName="this.drugName" v-bind:hcpi="this.hcpi" v-bind:drug_type="this.drug_type" v-bind:price="this.price" />
+            </div>
           <section class="d-flex">
-              <aside v-if="user.priviledges === 2">
+              <aside v-if="user.priviledges === 1">
+                  <AdminSidebar v-on:choice="renderAdminContent($event)" />
+              </aside>
+              <aside v-if="user.priviledges === 2 && status === 1">
                   <VendorSidebar v-on:choice="renderComponentContent($event)" />
               </aside>
               <aside v-if="user.priviledges === 3">
@@ -14,16 +23,25 @@
               <main style="padding:10px">
                   <h4 style="color:black">{{ content }}</h4>
                   <section class="main-content">
-                    <section v-if="user.priviledges === 2" class="width-50">
+                    <section v-if="user.priviledges === 1" class="width-50">
+                        <AllVendors v-on:open-vendor-view="openVendorView" v-if="vendors"/>
+                        <AllCustomers :key="update_all_customers" v-if="customers" />
+                    </section>
+                    <section v-if="user.priviledges === 2 && status === 1" class="width-50">
                         <SearchComponent v-if="drugs"/>
                         <AllVendorDrugs v-on:viewDrug="popUpViewDrugView" :key="this.$store.getters.getDrugProps" v-bind:newDrug ="this.new_drug" v-if="drugs"/>
+                        <VendorSettings v-on:profile_updated="updateVendorShop()" v-if="settings" />
                     </section>
                     <section v-if="user.priviledges === 3" class="width-50">
+                        <HealthInformation v-if="health" />
                         <UserProfile v-if="profile" v-bind:user="user"/>
                     </section>
                     <section class="width-40">
                         <AddDrugForm v-if="drugs" v-on:new-drug="pushNewDrug($event)"/>
                         <EditUserProfile v-bind:user="this.user" v-if="profile" />
+                        <VendorShop :key="this.update_vendor" v-if="settings" />
+                        <SignUpNewVendor v-if="vendors" />
+                        <CustomerSignUp v-on:new_customer="updateAllCustomers()" v-if="customers" />
                     </section>
                   </section>
               </main>
@@ -33,6 +51,7 @@
 </template>
 
 <script>
+import SellDrugEvent from './vendor/drugs/SellDrugEvent';
 var config = {
     headers: {
         'Authorization': "Bearer "+localStorage.getItem('token'),
@@ -42,17 +61,28 @@ export default {
     data(){
         return {
             content: '',
+            vendors:false,
+            customers:false,
             drugs:false,
             settings:false,
-            customers:false,
-            medecine:false,
             health:false,
             profile:false,
             drugProp: 0,
             displayDrugView: false,
+            displayVendorView: false,
             drugId: '',
+            drugName:'',
+            hcpi:'',
+            drug_type:'',
+            price: 0,
             new_drug:'',
-            updated_user: {}
+            updated_user: {},
+            sell: false,
+            update_vendor:0,
+            update_all_customers:0,
+            vendorName: '',
+            id: 0,
+            status: 1,
         }
     },
     props:['user'],
@@ -61,6 +91,10 @@ export default {
             if((value.priviledges === 2) && (!value.picture)){
                 this.$noty.info('Hey there, Ensure to setup your profile for your OTC Shop to be displayed on our Home page!')
             }
+            if((value.priviledges === 2) &&(!value.status)){
+                this.status = 0;
+                this.$noty.error('Warning!!! Your account has been disabled due to some irregular activities, contact the Admin on 08122632296 for more information');
+            }
         }
     },
     methods: {
@@ -68,22 +102,12 @@ export default {
             if(value === 'My drugs'){
                 this.content = 'My drugs';
                 this.drugs = true;
-                this.settings = this.customers = this.medecine = false;
+                this.settings = false;
             }
             if(value === 'Settings'){
                 this.content = 'Settings';
                 this.settings = true;
-                this.drugs = this.customers = this.medecine = false;
-            }
-            if(value === 'Customers'){
-                this.content = 'Customers';
-                this.customers = true;
-                this.drugs = this.settings = this.medecine = false;
-            }
-            if(value === 'Sell medecine'){
-                this.content = 'Sell medecine';
-                this.medecine = true;
-                this.drugs = this.settings = this.customers = false;
+                this.drugs = false;
             }
         },
         renderCustomerContent(value){
@@ -98,21 +122,60 @@ export default {
                 this.health = false;
             }
         },
+        openVendorView(name,id){
+            this.displayVendorView = true;
+            this.vendorName = name;
+            this.id = id;
+            
+        },
+        renderAdminContent(value){
+            if(value === 'vendors'){
+                this.content = 'Vendors';
+                this.vendors = true;
+                this.customers = false;
+            }
+            if(value === 'customers'){
+                this.content = 'Customers';
+                this.customers = true;
+                this.vendors = false;
+            }
+        },
         populateDrugProps(){
             this.drugProp++;
         },
         popUpViewDrugView($event){
             this.displayDrugView = true;
             this.drugId = $event;
-            console.log(this.user)
         },
         closeDisplayDrugView(){
             this.displayDrugView = false;
             this.drugProp++;
         },
+        closeVendorView(){
+            this.displayVendorView = false;
+        },
+        closeSellDrug(){
+            this.sell = false;
+        },
         pushNewDrug(value){
             this.new_drug = value;
         },
+        updateVendorShop(){
+            this.update_vendor++;
+        },
+        updateAllCustomers(){
+            this.update_all_customers++;
+        }
+    },
+    created(){
+        SellDrugEvent.$on('sell', (value,id,hcpi,drug_type,price) => {
+            this.sell = true;
+            this.drugName = value;
+            this.drugId = id;
+            this.hcpi = hcpi;
+            this.drug_type = drug_type;
+            this.price = price;
+        })
     }
 }
 </script>

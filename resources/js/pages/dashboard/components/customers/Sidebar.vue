@@ -11,7 +11,7 @@
       <ul>
           <li :id="(choosen === 'profile')? 'selected' : 'unselected'" @click="choice('profile')">
               <span style="margin-left: 10px;">
-                  <i :id="(choosen === 'profile')? 'select' : 'unselect'" class="fa fa-user"></i>
+                  <i :id="(choosen === 'profile')? 'select' : 'unselect'" class="fa fa-user-o"></i>
                   <span :id="(choosen === 'profile')? 'select' : 'unselect'">Profile</span>
               </span>
           </li>

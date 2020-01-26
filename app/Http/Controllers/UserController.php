@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 use App\User;
+use App\Purchase;
 use Illuminate\Http\Request;
+use App\Drug;
+use App\Vendor;
+use Illuminate\Support\Facades\DB;
 use Validator;
 
 class UserController extends Controller
@@ -24,7 +28,7 @@ class UserController extends Controller
             'email' => 'required|email|unique:users',
             'password' => 'required|min:6',
             'age' => 'required|integer',
-            'phone' => 'required|max:11',
+            'phone' => 'required|max:11|unique',
         ];
     }
     public function update_rules()
@@ -156,9 +160,146 @@ class UserController extends Controller
         }
     }
 
-    // see all the drugs sold by vendors monthly
-    public function monthlyPurchase()
+    // register customer purchase
+    public function purchase(Request $request)
     {
+        $number = $request->number;
+        $drugId = $request->drug_id;
+        $qty = $request->qty;
+        // get user id
+        $user = User::where('phone',$number)->first()->id;
+        if(!$user){
+            return response()->json(['error' => 'Customer not found, please kindly signup the customer']);
+        }
+        $vendor_id = auth()->user()->id;
+        $purchase = new Purchase();
+        $purchase->drug_id = $drugId;
+        $purchase->qty = $qty;
+        $purchase->purchasedBy = $user;
+        $purchase->purchasedFrom = $vendor_id;
+        // subtract bought qty from qty of drugs
+        $drug = Drug::where('vendor_id',$vendor_id)->where('id',$drugId)->first();
+        $new_qty = $drug->qty - $qty;
+        $drug->qty = $new_qty;
+        $drug->save();
+
+        $purchase->save();
+
+        return response()->json(['message' => 'Purchase recorded successfully']);
+
+    }
+
+    public function customerDrugHistory($phone)
+    {
+        $user = User::where('phone','LIKE','%'.$phone.'%')->where('priviledges',3)->first();
+        if(!$user){
+            return response()->json(['error'=> 'New customer? please signup']);
+        }
+        else {
+            $purchases = $user->customerPurchase()->pluck('drug_id');
+            if(empty($purchases)){
+                return response()->json(['message' => 'Customer purchase history not found']);
+            }
+            $drug_qty = $user->customerPurchase()->pluck('qty');
+            $vendors = $user->customerPurchase()->pluck('purchasedFrom');
+            $times = $user->customerPurchase()->pluck('created_at');
+            foreach($purchases as $purchase){
+                $drug_names[] = Drug::where('id',$purchase)->first()->name;
+            }
+            foreach($vendors as $vendor){
+                $vendor_names[] = User::where('id',$vendor)->first()->name;
+            }
+            foreach($times as $value){
+                $time[] = date('Y-m-d',strtotime($value));
+            }
+            return response()->json(['drug_names' => $drug_names, 'drug_qty' => $drug_qty, 'vendor_names' => $vendor_names, 'time' => $time,'user' => $user]);
+        }
+    }
+
+    public function getDrugPurchase($id){
+        $quantities = Purchase::where('purchasedFrom',auth()->user()->id)->where('drug_id',$id)->pluck('qty');
+        if(!$quantities){
+            return response()->json(['error' => 'No purchase frequency found']);
+        }
+        $qty = 0;
+        foreach($quantities as $quantity){
+            $qty = $qty + $quantity;
+        }
+        return $qty;
+    }
+
+    public function vendors()
+    {
+        $vendors = DB::table('users')->join(('vendors'),function($join)
+        {
+            $join->on('users.id', '=' ,'vendors.store_id')
+            ->where('users.priviledges', '=', '2');
+        })->get();
+
+        return response()->json(['vendors' => $vendors]);
+    }
+
+    public function customers()
+    {
+        $customers = User::where('priviledges',3)->get();
+
+        return response()->json(['customers' => $customers]);
+    }
+
+    public function allVendorPurchase($id)
+    {
+        $purchases = User::where('id',$id)->first()->vendorSoldDrugs;
+        $i=0;$j=0;
+        foreach($purchases as $purchase){
+            $vendorSoldDrugs[$i][$j] = Drug::where('id',$purchase->drug_id)->first()->name;
+            $vendorSoldDrugs[$i][$j+1] = $purchase->qty;
+            $vendorSoldDrugs[$i][$j+2] = User::where('id',$purchase->purchasedBy)->first()->name;
+            $vendorSoldDrugs[$i][$j+3] = date('Y-m-d',strtotime($purchase->created_at));
+            $i++;
+        }
+        return response()->json(['purchases' => $vendorSoldDrugs]);
+    }
+
+    public function vendorFrequency($id){
+        // get all purchases made by selected vendor
+        $purchases = Purchase::where('purchasedFrom',$id)->get()->groupBy('drug_id');
+        $quantity = [];
+        $purchase_array = [];
         
+        foreach ($purchases as $key => $value) {
+            $drug_key[] = $key;
+            $total_qty = 0;
+            foreach($value as $item){
+                $total_qty = $total_qty + $item->qty;
+            }
+            $quantity[] = $total_qty;
+        }
+        $i = 1;
+        $j = 0;
+        $purchase_array[$i-1][$j] = 'Drugs';
+        $purchase_array[$i-1][$j+1] = 'frequency';
+        foreach($drug_key as $key){
+            $name = Drug::where('id',$key)->first()->name;
+            $purchase_array[$i][$j] = $name;
+            $purchase_array[$i][$j+1] = $quantity[$i-1];
+            $i++;
+        }
+        return $purchase_array;
+    }
+
+    public function toggleActivation($id){
+        $update = User::where('id',$id)->first();
+        // check if vendor is already activated
+        if($update->status){
+            $update->status = false;
+        }
+        else{
+            $update->status = true;
+        }
+        $update->save();
+        $status = $update->status ? 'true' : 'false';
+
+        return response()->json(['status' => $status]);
+
     }
 }

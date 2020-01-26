@@ -21,7 +21,8 @@ class DrugController extends Controller
             'hcpi' => 'required',
             'dosage' => 'required',
             'active_ingredients' => 'required',
-            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+            'nafdac' => 'required',
+            'expiry_date' => 'required',
         ];
     }
     /**
@@ -66,18 +67,9 @@ class DrugController extends Controller
             //create a new drug
             // upload photo
             $fileName = Null;
-            if($request->hasFile('image')) {
-                $exploded = explode(',', $request->image);
-                $decoded = base64_decode($exploded[1]);
-                if(str_contains($exploded[0], 'jpeg')){
-                    $extension = 'jpg';
-                }
-                else {
-                    $extension = 'png';
-                }
-                $fileName = str_random().'.'.$extension;
-                $path = public_path().'/'.$fileName;
-                file_put_contents($path, $decoded);
+            if($request->image){
+                $fileName = time().'.'.explode('/',explode(':',substr($request->image,0,strpos($request->image,';')))[1])[1];
+                \Image::make($request->image)->save(public_path('images/').$imageName);
             }
             $drug = Drug::create([
                 'name' => $request->name,
@@ -94,7 +86,9 @@ class DrugController extends Controller
                 'drug_type' => $request->drug_type,
                 'dosage' => $request->dosage,
                 'note' => $request->note,
-                'photo' => $fileName
+                'photo' => $fileName,
+                'nafdac' => $request->nafdac,
+                'expiry_date' => $request->expiry_date
             ]);
             return response()->json(['drug' => $drug,'message' => 'Drug added successfully'], 200);
         }
@@ -153,19 +147,18 @@ class DrugController extends Controller
             $drug->drug_type = $request->drug_type;
             $drug->dosage = $request->dosage;
             $drug->note = $request->note;
-            if($request->hasFile('image')){
-                $exploded = explode(',', $request->image);
-                $decoded = base64_decode($exploded[1]);
-                if(str_contains($exploded[0], 'jpeg')){
-                    $extension = 'jpg';
+            $drug->nafdac = $request->nafdac;
+            $drug->expiry_date = $request->expiry_date;
+            if($drug->photo){
+                $path = public_path().'/images/'.$drug->photo;
+                if(file_exists($path)){
+                    unlink($path);
                 }
-                else {
-                    $extension = 'png';
-                }
-                $fileName = str_random().'.'.$extension;
-                $path = public_path().'/'.$fileName;
-                file_put_contents($path, $decoded);
-                $drug->photo = $fileName;
+            }
+            if($request->image){
+                $imageName = time().'.'.explode('/',explode(':',substr($request->image,0,strpos($request->image,';')))[1])[1];
+                \Image::make($request->image)->save(public_path('images/').$imageName);
+                $drug->photo = $imageName;
             }
 
             $drug->save();
@@ -187,5 +180,9 @@ class DrugController extends Controller
             unlink($path);
         }
         $drug->delete();
+    }
+
+    public function drugPurchaseFrequency(){
+        
     }
 }

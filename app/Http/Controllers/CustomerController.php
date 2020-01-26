@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\User;
+use App\Drug;
+use App\Purchase;
 use Validator;
 
 class CustomerController extends Controller
@@ -23,7 +25,7 @@ class CustomerController extends Controller
             'email' => 'required|email|unique:users',
             'password' => 'required|min:6',
             // 'age' => 'required|integer',
-            'phone' => 'required|max:11',
+            'phone' => 'required|max:11|unique:users',
         ];
     }
 
@@ -68,7 +70,7 @@ class CustomerController extends Controller
 
             $token = $user->createToken('myapp')->accessToken;
 
-            return response()->json(['token' => $token,'user' => $user], 200);
+            return response()->json(['token' => $token,'user' => $user,'message' => 'Customer registered successfully'], 200);
         }
     }
 
@@ -117,4 +119,35 @@ class CustomerController extends Controller
     // {
     //     //
     // }
+    
+    public function healthInformation(){
+        // get authenticated customers id
+        $id = auth()->user()->id;
+        // get all purchases made by customer
+        $purchases = Purchase::where('purchasedBy',$id)->get()->groupBy('drug_id');
+        $quantity = [];
+        $purchase_array = [];
+        
+        foreach ($purchases as $key => $value) {
+            $drug_key[] = $key;
+            $total_qty = 0;
+            foreach($value as $item){
+                $total_qty = $total_qty + $item->qty;
+            }
+            $quantity[] = $total_qty;
+        }
+        $i = 1;
+        $j = 0;
+        $purchase_array[$i-1][$j] = 'Drugs';
+        $purchase_array[$i-1][$j+1] = 'frequency';
+        foreach($drug_key as $key){
+            $name = Drug::where('id',$key)->first()->name;
+            $purchase_array[$i][$j] = $name;
+            $purchase_array[$i][$j+1] = $quantity[$i-1];
+            $i++;
+        }
+        return $purchase_array;
+    
+    }
+    
 }

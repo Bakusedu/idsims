@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\User;
 use App\Drug;
+use App\Vendor;
 use Validator;
-
 class VendorController extends Controller
 {
     /**
@@ -25,6 +25,14 @@ class VendorController extends Controller
              'password' => 'required|min:6|confirmed',
             //  'age' => 'required|integer',
              'phone' => 'required|max:11',
+         ];
+     }
+
+     public function settings_rules()
+     {
+         return [
+             'name' => 'required|max:20',
+             'address' => 'required|max:65'
          ];
      }
     
@@ -115,12 +123,77 @@ class VendorController extends Controller
             $query = strtolower($query);
             $drug = User::find(auth()->id())->drugs()->where('name','LIKE','%'.$query.'%')
             ->orWhere('company','LIKE','%'.$query.'%')->orWhere('effects','LIKE','%'.$query.'%')
-            ->orWhere('interaction','LIKE','%'.$query.'%')->orWhere('cure','LIKE','%'.$query.'%')->get();
+            ->orWhere('interaction','LIKE','%'.$query.'%')->orWhere('cure','LIKE','%'.$query.'%')->orWhere('active_ingredients','LIKE','%'.$query.'%')->get();
         }
         else {
             $drug = Drug::where('vendor_id',auth()->id())->get();
         }
         return $drug;
+    }
+
+    // Set vendor profile in home-page
+
+    public function upload(Request $request){
+        //validate user requests
+        $rules = $this->settings_rules();
+        $validator = Validator::make($request->all(),$rules);
+        if($validator->fails()){
+            return response()->json(['error' => $validator->errors()],400);
+        }
+        else {
+            // image upload
+            if($request->photo){
+                $imageName = time().'.'.explode('/',explode(':',substr($request->photo,0,strpos($request->photo,';')))[1])[1];
+                \Image::make($request->photo)->resize(800,600)->save(public_path('images/').$imageName);
+            }
+            else {
+                $imageName = null;
+            }
+
+            $vendor = Vendor::where('store_id',auth()->user()->id)->first();
+            // if no image use picture from db
+            if($vendor){
+                if($vendor->picture){
+                    
+                    $path = public_path().'/images/'.$vendor->picture;
+                    if(file_exists($path)){
+                        unlink($path);
+                    }
+                }
+                // update vendor settings
+                $vendor->store_name = $request->name;
+                $vendor->address = $request->address;
+                $vendor->picture = $imageName;
+                $user = $vendor->user;
+                $user->picture = 'set';
+                $user->save();
+                $vendor->save();
+
+                return response()->json(['vendor' => $vendor,'message' => 'Profile successfully updated']);
+            }
+            else {
+                $imageName = null;
+                $vendor = Vendor::create([
+                    'store_id' => auth()->user()->id,
+                    'store_name' => $request->name,
+                    'address' => $request->address,
+                    'picture' => $imageName,
+                ]);
+                // update picture field in user table
+                $user = $vendor->user;
+                $user->picture = 'set';
+                $user->save();
+                return response()->json(['vendor' => $vendor,'message' => 'Profile successfully created']);
+            }
+        }
+    }
+
+    public function getSettings()
+    {
+        if($settings = Vendor::where('store_id',auth()->user()->id)->first()){
+            return response()->json(['settings' => $settings,'user' => auth()->user()->name]);
+        }
+        return response()->json(['error' => 'Please setup your OTC shop profile']);
     }
     /**
      * Remove the specified resource from storage.

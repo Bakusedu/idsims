@@ -16,5 +16,9 @@ export default {
     .btn-white {
         text-decoration:none;
         color:#2770c2;
+        font-weight:bold;
+    }
+    .btn-white:hover {
+        text-decoration:none;
     }
 </style>

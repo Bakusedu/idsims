@@ -7,7 +7,9 @@
               </router-link>
           </div>
           <div id="user-name">
-              <span id="line-height" class="font-s">Hello, {{ user.name }}</span>  
+              <span style="font-weight:900"  v-if="user.priviledges === 1" id="line-height" class="font-s"><i class="fa fa-user-circle-o"></i> Admin</span>  
+              <span style="font-weight:900" v-if="user.priviledges === 2" id="line-height" class="font-s"><i class="fa fa-user-md"></i> Vendor</span>  
+              <span style="font-weight:900" v-if="user.priviledges === 3" id="line-height" class="font-s"><i class="fa fa-user-o"></i> Customer</span>  
           </div>
           <nav>
               <ul>

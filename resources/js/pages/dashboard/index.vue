@@ -8,11 +8,6 @@
 </template>
 
 <script>
-var config = {
-    headers: {
-        'Authorization': "Bearer "+localStorage.getItem('token'),
-    }
-};
 export default {
     data(){
       return {

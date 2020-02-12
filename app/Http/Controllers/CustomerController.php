@@ -120,9 +120,7 @@ class CustomerController extends Controller
     //     //
     // }
     
-    public function healthInformation(){
-        // get authenticated customers id
-        $id = auth()->user()->id;
+    public function healthInformation($id){
         // get all purchases made by customer
         $purchases = Purchase::where('purchasedBy',$id)->get()->groupBy('drug_id');
         $quantity = [];
@@ -147,7 +145,29 @@ class CustomerController extends Controller
             $i++;
         }
         return $purchase_array;
-    
     }
     
+    // last feature am going to implement
+    public function compareDrug($drugname)
+    {
+        // get the drug name
+        // search for all the drugs that have that name using the where clause
+        $drugs = Drug::where('name',$drugname)->get(['name','price','company','vendor_id']);
+        
+        $i = 0;
+
+        foreach($drugs as $drug){
+            $array_1 = $drug;
+            $array_2 = User::findOrFail($drug->vendor_id)->vendors;
+
+            // join the two arrays
+            $response[$i] = array_merge($array_1->toArray(),$array_2->toArray());
+
+            $i++;
+        }
+
+        return $response;
+        // parameters to be returned include 'drug_name','drug_price','store_name','store_address','company'
+
+    }
 }

@@ -52,7 +52,7 @@ components: {
       },
   },
 mounted(){
-    console.log(this.name);
+  
 }
 
 }

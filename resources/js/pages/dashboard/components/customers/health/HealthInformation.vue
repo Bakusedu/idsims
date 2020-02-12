@@ -16,7 +16,7 @@ export default {
     data(){
         return {
             token: '',
-            url: 'http://127.0.0.1:8000/api/health_information',
+            url: 'http://127.0.0.1:8000/api/health_information/'+this.id,
             chartOptions: {
             chart: {
             title: 'Drug Purchase Frequency',
@@ -28,7 +28,7 @@ export default {
             ],
         }
     },
-
+    props:['id'],
     methods: {
         getHealthInformation(){
             this.token = localStorage.getItem('token');

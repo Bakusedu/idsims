@@ -28,6 +28,7 @@
                     <span @click="toggleActivation(vendor.store_id)" :class="vendor.status === 1 ?'btn btn-danger btn-disabled':'btn btn-danger'">
                         <i class="fa fa-user-times"></i>
                     </span>
+                    <span v-if="!vendor.viewed" class="badge badge-secondary">New</span>
                 </td>
                 </tr>
             </tbody>

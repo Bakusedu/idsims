@@ -7,6 +7,7 @@ use App\User;
 use App\Drug;
 use App\Vendor;
 use Validator;
+use Illuminate\Support\Facades\DB;
 class VendorController extends Controller
 {
     /**
@@ -121,14 +122,22 @@ class VendorController extends Controller
     {
         if($query = \Request::get('q')){
             $query = strtolower($query);
-            $drug = User::find(auth()->id())->drugs()->where('name','LIKE','%'.$query.'%')
-            ->orWhere('company','LIKE','%'.$query.'%')->orWhere('effects','LIKE','%'.$query.'%')
-            ->orWhere('interaction','LIKE','%'.$query.'%')->orWhere('cure','LIKE','%'.$query.'%')->orWhere('active_ingredients','LIKE','%'.$query.'%')->get();
+
+            $drugs = DB::table('drugs')
+            ->select('id','name','company','price','effects','interaction','cure','qty','overdose','hcpi','active_ingredients','expiry_date')
+            ->where(function($value) use ($query) {
+                $value->where('name', 'like', '%' . $query . '%')
+                ->orWhere('company', 'like', '%' . $query . '%')
+                ->orWhere('cure', 'like', '%' . $query . '%')
+                ->orWhere('active_ingredients', 'like', '%' . $query . '%');
+            })
+            ->Where('vendor_id', '=', auth()->id())
+            ->get();
         }
         else {
-            $drug = Drug::where('vendor_id',auth()->id())->get();
+            $drugs = Drug::where('vendor_id',auth()->id())->get();
         }
-        return $drug;
+        return $drugs;
     }
 
     // Set vendor profile in home-page

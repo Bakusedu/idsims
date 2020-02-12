@@ -5,7 +5,10 @@
                 <DisplayDrugView v-bind:drugId="this.drugId" v-on:close="closeDisplayDrugView()" />
             </div>
             <div v-if="displayVendorView">
-                <DisplayVendorView v-if="vendorName" v-bind:name="this.vendorName" v-bind:id="this.id" v-on:close_vendor="closeVendorView()" />
+                <DisplayVendorView v-bind:id="this.id" v-on:close_vendor="closeVendorView()" />
+            </div>
+            <div v-if="displayCustomerView">
+                <DisplayCustomerView v-bind:id="this.id" v-on:close_customer="closeCustomerView()" />
             </div>
             <div v-if="sell">
                 <SellDrugView v-on:close_sell="closeSellDrug()" v-bind:drugId="this.drugId" v-bind:drugName="this.drugName" v-bind:hcpi="this.hcpi" v-bind:drug_type="this.drug_type" v-bind:price="this.price" />
@@ -17,23 +20,23 @@
               <aside v-if="user.priviledges === 2 && status === 1">
                   <VendorSidebar v-on:choice="renderComponentContent($event)" />
               </aside>
-              <aside v-if="user.priviledges === 3">
+              <aside v-if="user.priviledges === 3 && status === 1">
                   <CustomerSidebar v-on:customer="renderCustomerContent($event)"/>
               </aside>
               <main style="padding:10px">
                   <h4 style="color:black">{{ content }}</h4>
                   <section class="main-content">
                     <section v-if="user.priviledges === 1" class="width-50">
-                        <AllVendors v-on:open-vendor-view="openVendorView" v-if="vendors"/>
-                        <AllCustomers :key="update_all_customers" v-if="customers" />
+                        <AllVendors v-on:open-vendor-view="openVendorView" :key="keyUpdate" v-if="vendors"/>
+                        <AllCustomers v-on:open-customer-view="openCustomerView" :key="update_all_customers" v-if="customers" />
                     </section>
                     <section v-if="user.priviledges === 2 && status === 1" class="width-50">
                         <SearchComponent v-if="drugs"/>
                         <AllVendorDrugs v-on:viewDrug="popUpViewDrugView" :key="this.$store.getters.getDrugProps" v-bind:newDrug ="this.new_drug" v-if="drugs"/>
                         <VendorSettings v-on:profile_updated="updateVendorShop()" v-if="settings" />
                     </section>
-                    <section v-if="user.priviledges === 3" class="width-50">
-                        <HealthInformation v-if="health" />
+                    <section v-if="user.priviledges === 3 && status === 1" class="width-50">
+                        <HealthInformation v-if="health" v-bind:id="user.id" />
                         <UserProfile v-if="profile" v-bind:user="user"/>
                     </section>
                     <section class="width-40">
@@ -42,6 +45,8 @@
                         <VendorShop :key="this.update_vendor" v-if="settings" />
                         <SignUpNewVendor v-if="vendors" />
                         <CustomerSignUp v-on:new_customer="updateAllCustomers()" v-if="customers" />
+                        <CompareDrugs v-if="health" />
+                        <CompareResponse v-if="health" />
                     </section>
                   </section>
               </main>
@@ -70,6 +75,7 @@ export default {
             drugProp: 0,
             displayDrugView: false,
             displayVendorView: false,
+            displayCustomerView: false,
             drugId: '',
             drugName:'',
             hcpi:'',
@@ -80,7 +86,7 @@ export default {
             sell: false,
             update_vendor:0,
             update_all_customers:0,
-            vendorName: '',
+            keyUpdate: 0,
             id: 0,
             status: 1,
         }
@@ -91,9 +97,9 @@ export default {
             if((value.priviledges === 2) && (!value.picture)){
                 this.$noty.info('Hey there, Ensure to setup your profile for your OTC Shop to be displayed on our Home page!')
             }
-            if((value.priviledges === 2) &&(!value.status)){
+            if(((value.priviledges === 2) || (value.priviledges === 3)) && (!value.status)){
                 this.status = 0;
-                this.$noty.error('Warning!!! Your account has been disabled due to some irregular activities, contact the Admin on 08122632296 for more information');
+                this.$noty.error('Warning!!! Your account may have been disabled, contact the Admin on 08122632296 for more information');
             }
         }
     },
@@ -124,7 +130,11 @@ export default {
         },
         openVendorView(name,id){
             this.displayVendorView = true;
-            this.vendorName = name;
+            this.id = id;
+            
+        },
+        openCustomerView(name,id){
+            this.displayCustomerView = true;
             this.id = id;
             
         },
@@ -153,6 +163,10 @@ export default {
         },
         closeVendorView(){
             this.displayVendorView = false;
+            this.keyUpdate++;
+        },
+        closeCustomerView(){
+            this.displayCustomerView = false;
         },
         closeSellDrug(){
             this.sell = false;

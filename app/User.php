@@ -62,4 +62,5 @@ class User extends Authenticatable
     {
         return $this->hasOne('App\Vendor','store_id','id');
     }
+
 }

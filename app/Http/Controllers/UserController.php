@@ -89,11 +89,13 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show()
+    public function show($id)
     {
-        //show the Auth users profile
+        //show the users profile
         // attached to the response headers must append the users token
-        return auth()->user();
+        $phone = User::where('id',$id)->first()->phone;
+
+        return response()->json(['phone' => $phone]);
     }
 
     /**
@@ -191,7 +193,9 @@ class UserController extends Controller
 
     public function customerDrugHistory($phone)
     {
-        $user = User::where('phone','LIKE','%'.$phone.'%')->where('priviledges',3)->first();
+        
+        $user = User::where('phone',$phone)->Orwhere('id',$phone)->where('priviledges',3)->first();
+
         if(!$user){
             return response()->json(['error'=> 'New customer? please signup']);
         }
@@ -249,6 +253,9 @@ class UserController extends Controller
     public function allVendorPurchase($id)
     {
         $purchases = User::where('id',$id)->first()->vendorSoldDrugs;
+        $new = Vendor::where('store_id',$id)->first();
+        $new->viewed = true;
+        $new->save();
         $i=0;$j=0;
         foreach($purchases as $purchase){
             $vendorSoldDrugs[$i][$j] = Drug::where('id',$purchase->drug_id)->first()->name;
@@ -301,5 +308,39 @@ class UserController extends Controller
 
         return response()->json(['status' => $status]);
 
+    }
+
+    // get all registered vendors who have completed shop profiles
+    public function registeredVendors()
+    {
+        $vendors = DB::table('users')->join('vendors','vendors.store_id','=','users.id')
+        ->where(['users.priviledges' => '2'])->where(['users.status' => '1'])->get();
+
+        return $vendors;
+    }
+
+    // get all vendors drugs.....request made by customer
+    public function getVendorDrugs($id)
+    {
+        $drugs = User::where('id',$id)->first()->drugs;
+
+        return $drugs;
+    }
+
+    // get specified drug
+    public function viewDrug($id)
+    {
+        $drug = Drug::findOrFail($id);
+
+        return $drug;
+    }
+
+    // logout auth user
+
+    public function logout()
+    {
+        $user = auth()->user()->token();
+        $user->delete();
+        return 'logged out';
     }
 }

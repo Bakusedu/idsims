@@ -19,13 +19,13 @@
                 <td style="color:black">{{ customer.phone }}</td>
                 <td style="color:black">{{ customer.address }}</td>
                 <td>
-                    <span class="btn btn-primary mb-1">
+                    <span @click="emitCustomerView(customer.name,customer.id)" class="btn btn-primary mb-1">
                         <i class="fa fa-eye"></i>
                     </span>
-                    <span class="btn btn-success mb-1">
+                    <span  @click="toggleActivation(customer.id)" :class="customer.status === 0 ?'btn btn-success btn-disabled mb-1':'btn btn-success mb-1'">
                         <i class="fa fa-bullhorn"></i>
                     </span>
-                    <span class="btn btn-danger">
+                    <span @click="toggleActivation(customer.id)" :class="customer.status === 1 ?'btn btn-danger btn-disabled':'btn btn-danger'">
                         <i class="fa fa-user-times"></i>
                     </span>
                 </td>
@@ -59,6 +59,23 @@ export default {
                          this.customers = res.customers;
                 });
         },
+        emitCustomerView(name,id){
+            this.$emit('open-customer-view',name,id);
+        },
+        toggleActivation(id){
+            this.url = "http://127.0.0.1:8000/api/toggle_status/"+id;
+            this.token = localStorage.getItem('token');
+            let config = {
+                    headers:{
+                        'Authorization': "Bearer "+this.token
+                    }
+                }
+                    fetch(this.url,config)
+                     .then(res => res.json())
+                     .then(res => {
+                         location.reload();
+                });
+        }
     },
     mounted(){
         this.fetchAllCustomers();
@@ -66,6 +83,8 @@ export default {
 }
 </script>
 
-<style>
-
+<style scoped>
+    .btn-disabled {
+        background-color: #949e94;
+    }
 </style>

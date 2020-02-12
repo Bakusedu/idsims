@@ -2,7 +2,7 @@
   <div>
       <header>
           <div>
-              <h3 class="mb-0 line-height-2">IDSIMS</h3>
+              <h3 class="mb-0 line-height-2" style="font-weight:bolder">IDSIMS</h3>
           </div>
           <nav v-if="!name">
               <ul style="margin-right:10px;" class="line-height-2">

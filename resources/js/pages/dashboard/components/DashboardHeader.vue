@@ -18,7 +18,7 @@
                   </li>
               </ul>
               <ul>
-                  <li>    
+                  <li @click="logout()">    
                         <span class="font-s"><i class="fa fa-power-off"></i></span>
                   </li>
               </ul>
@@ -78,9 +78,32 @@
 export default {
     data(){
         return {
-
+            token: '',
+            url: '',
         }
     },
     props: ['user'],
+    methods: {
+        logout(){
+            let choice = confirm('Are you sure you want to log out?');
+            if(choice){
+                this.token = localStorage.getItem('token');
+                this.url = 'http://127.0.0.1:8000/api/logout';
+            let config = {
+                headers:{
+                    'Authorization': "Bearer "+this.token
+                }
+            }
+            fetch(this.url,config)
+            .then(res => res.json())
+            .then(res => {
+                this.chartData = res;
+            });
+                localStorage.removeItem('token');
+                this.$router.push('/');
+                this.$noty.info('Logged out successfully');
+            }
+        } 
+    }
 }
 </script>

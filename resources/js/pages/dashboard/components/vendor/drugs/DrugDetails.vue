@@ -12,7 +12,7 @@
         </div>
         <div class="d-flex" style="justify-content:space-between">
             <p style="color:black;width:40%">Price</p>
-            <p style="color:black;width:40%">{{ drugDetails.price }}</p>
+            <p style="color:black;width:40%">&#8358; {{ drugDetails.price }}</p>
         </div>
         <div class="d-flex" style="justify-content:space-between">
             <p style="color:black;width:40%">Drug type</p>

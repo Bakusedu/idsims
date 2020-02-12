@@ -19,7 +19,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 // create a user
 Route::post('user','UserController@store');
 // view a user profile
-Route::get('user','UserController@show')->middleware('auth:api');
+Route::get('user/{user_id}','UserController@show')->middleware('auth:api');
 // update a user
 Route::put('user/{user_id}','UserController@update')->middleware('auth:api');
 // delete a user
@@ -30,8 +30,6 @@ Route::get('/users','UserController@index')->middleware('auth:api');
 Route::post('/login','UserController@login');
 // create a customer
 Route::post('/customer','CustomerController@store');
-// show a customer profile
-Route::get('/customer/{customer_id}','CustomerController@show');
 // create a vendor
 Route::post('/vendor','VendorController@store');
 // create a drug
@@ -53,7 +51,7 @@ Route::post('/purchase','UserController@purchase')->middleware('auth:api');
 // get vendor drug purchase
 Route::get('/drug_purchase/{id}','UserController@getDrugPurchase')->middleware('auth:api');
 // get health information data through purchases made by customer
-Route::get('/health_information','CustomerController@healthInformation')->middleware('auth:api');
+Route::get('/health_information/{customer_id}','CustomerController@healthInformation')->middleware('auth:api');
 // post vendor settings
 Route::post('/vendor_settings','VendorController@upload')->middleware('auth:api');
 // get vendor settings
@@ -68,3 +66,13 @@ Route::get('/vendor_purchases/{vendor_id}','UserController@allVendorPurchase')->
 Route::get('/vendor_purchase_frequency/{vendor_id}','UserController@vendorFrequency')->middleware('auth:api');
 // toggle Vendor activation status
 Route::get('/toggle_status/{vendor_id}','UserController@toggleActivation')->middleware('auth:api');
+// Route to get all the systems registered vendors
+Route::get('/registered_vendors','UserController@registeredVendors');
+// Route to get registered vendors drugs
+Route::get('/registered_vendors/{vendor_id}','UserController@getVendorDrugs');
+// Route to view a drug on home page
+Route::get('/view_drug/{drug_id}','UserController@viewDrug');
+// Route to get searched drugs, their prices, store name and address
+Route::get('/compare_drug/{drug_name}','CustomerController@compareDrug')->middleware('auth:api');
+// Route to logout of the application and revoke token
+Route::get('/logout','UserController@logout')->middleware('auth:api');

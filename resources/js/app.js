@@ -37,6 +37,10 @@ import SignUpNewVendor from './pages/dashboard/components/admin/vendors/SignUpNe
 import AllCustomers from './pages/dashboard/components/admin/customers/AllCustomers';
 import DisplayVendorView from './pages/dashboard/components/admin/vendors/DisplayVendorView';
 import VendorSoldDrugs from './pages/dashboard/components/admin/vendors/VendorSoldDrugs';
+import DisplayCustomerView from './pages/dashboard/components/admin/customers/DisplayCustomerView';
+import CustomerBoughtDrugs from './pages/dashboard/components/admin/customers/CustomerBoughtDrugs';
+import CompareDrugs from './pages/dashboard/components/customers/health/CompareDrugs';
+import CompareResponse from './pages/dashboard/components/customers/health/CompareResponse';
 import store from './stores/store';
 import App from './views/App';
 import VueNoty from 'vuejs-noty';
@@ -45,6 +49,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'font-awesome/css/font-awesome.min.css';
 import 'vuejs-noty/dist/vuejs-noty.css';
 import VueGoogleCharts from 'vue-google-charts';
+import Vuetify from 'vuetify';
+import 'vuetify/dist/vuetify.min.css';
 
 Vue.component('AppHeader', AppHeader);
 Vue.component('AppFooter', AppFooter);
@@ -84,10 +90,15 @@ Vue.component('SignUpNewVendor',SignUpNewVendor);
 Vue.component('CustomerSignUp',CustomerSignUp);
 Vue.component('DisplayVendorView',DisplayVendorView);
 Vue.component('VendorSoldDrugs',VendorSoldDrugs);
+Vue.component('DisplayCustomerView',DisplayCustomerView);
+Vue.component('CustomerBoughtDrugs',CustomerBoughtDrugs);
+Vue.component('CompareDrugs',CompareDrugs);
+Vue.component('CompareResponse',CompareResponse);
 
 
 Vue.use(VueNoty);
 Vue.use(VueGoogleCharts);
+Vue.use(Vuetify);
 
 const app = new Vue({
     el: '#app',
